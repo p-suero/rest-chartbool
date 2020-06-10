@@ -3,6 +3,10 @@
     padding: 0;
     box-sizing: border-box;
 }
+main {
+    display: flex;
+    justify-content: space-around;
+}
 
 .chart-container {
     width: 500px;

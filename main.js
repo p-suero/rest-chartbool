@@ -1,17 +1,19 @@
 $(document).ready(function() {
 
+    //Alcuni ragionamenti provengono da un ticket con Donato e dallo scambio di idee con altri ragazzi
+
     //effettuo la chiamata ajax per recuperare la lista delle vendite
     $.ajax({
         "url": "http://157.230.17.132:4029/sales",
         "method": "GET",
         "success": function(data) {
-            console.log(data);
-
             //gestisco i dati per ottenere il fatturato mensile
-            vendite_mensili(data)
+            vendite_mensili(data);
+            //gestisco i dati per ottenere le vendite per persona
+            vendite_persona(data);
         },
         "error": function() {
-            alert("Si è verificato un errore")
+            alert("Si è verificato un errore");
         }
     })
 
@@ -50,7 +52,7 @@ $(document).ready(function() {
         var valoreAmount = Object.values(vendite_mensili);
 
         //setto il grafico
-        setLineChart(chiaveMesi,valoreAmount)
+        setLineChart(chiaveMesi,valoreAmount);
     }
 
     function ottieni_mese_testuale(mese) {
@@ -88,6 +90,70 @@ $(document).ready(function() {
                             beginAtZero: true
                         }
                     }]
+                }
+            }
+        })
+    }
+
+    function vendite_persona(data) {
+        //creo un oggetto contenente le vendite per persona
+        var vendite_persona = {};
+        var ammontare_totale = 0;
+
+        //creo un ciclo for per ottenere la lista delle vendite
+        for (var i = 0; i < data.length; i++) {
+            var vendita_corrente = data[i];
+            var venditore_corrente = vendita_corrente.salesman;
+            var ammontare_corrente = vendita_corrente.amount;
+
+            //aggiungo l'ammontare corrente a quello totale
+            ammontare_totale += ammontare_corrente;
+            //creo una condizione per aggiungere le chiavi e valori nell'oggetto
+            if (!vendite_persona.hasOwnProperty(venditore_corrente)) {
+                //se non ancora esiste la chiave l'aggiungo con il valore corrente
+                vendite_persona[venditore_corrente] = ammontare_corrente;
+            } else {
+                //altrimenti leggo la chiave e gli sommo l'ammontare corrente
+                vendite_persona[venditore_corrente] += ammontare_corrente;
+            }
+        }
+
+        //creo un ciclo for in per sovrascrivere i valori dell'oggetto in valori percentuali
+        for (var key in vendite_persona) {
+            //trasformo il valore in percentuale
+            var vendita_percentuale = (vendite_persona[key] / ammontare_totale * 100).toFixed(2);
+            //sovrascrivo il valore dell'oggetto
+            vendite_persona[key] = vendita_percentuale;
+        }
+
+        //recupero la chiave dell'oggetto
+        var persona_venditore = Object.keys(vendite_persona);
+        var ammontare_persona = Object.values(vendite_persona);
+        //setto il grafico a torta
+        setPieChart(persona_venditore, ammontare_persona)
+    }
+
+    function setPieChart(persona, amount) {
+        //seleziono l'elemento in pagina
+        var ctx = $('#chart-pie')[0].getContext('2d');
+
+        //vado a settare il grafico
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: persona,
+                datasets: [{
+                    data: amount,
+                    backgroundColor: ["red", "green", "yellow","orange"],
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Numero delle vendite divise per venditore'
+                },
+                legend: {
+                    position: "left",
                 }
             }
         })
