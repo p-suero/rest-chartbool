@@ -73,7 +73,8 @@ $(document).ready(function() {
                     data: amount,
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
-                    pointBackgroundColor: "green"
+                    pointBackgroundColor: "green",
+                    lineTension: 0,
                 }]
             },
             options: {
