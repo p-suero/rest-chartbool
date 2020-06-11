@@ -7,6 +7,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js" charset="utf-8"></script>
         <script src="https://momentjs.com/downloads/moment-with-locales.js" charset="utf-8"></script>
+        <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     </head>
     <body>
         <header>
@@ -16,15 +17,15 @@
             <div class="new-data">
                 <h2>Inserisci una nuova vendita:</h2>
                 <form>
-                    <select class="sellers">
+                    <select id="sellers">
                         <option value="">Seleziona un venditore</option>
                     </select>
-                    <select class="month">
+                    <select id="month">
                         <option value="">Seleziona un mese</option>
                     </select>
-                    <input type="number">
-                    <button>Inserisci</button>
+                    <input id="amount" type="number" placeholder="importo della vendita">
                 </form>
+                <button id="send-data">Inserisci vendita</button>
             </div>
             <div id="statics">
                 <div class="chart-wrapper">
@@ -34,6 +35,10 @@
                     <canvas id="chart-pie"></canvas>
                 </div>
         </main>
+        <!-- template per handlebars -->
+        <script id="option-template" type="text/x-handlebars-template">
+            <option value="{{valore}}">{{valore}}</option>
+        </script>
         <script src="main.js" charset="utf-8"></script>
     </body>
 </html>

@@ -11,7 +11,7 @@ header {
 
 .new-data {
     text-align: center;
-    height: 100px;
+    height: 150px;
     padding-top: 40px;
 }
 
@@ -20,14 +20,20 @@ h2 {
     font-size: 16px;
 }
 
+button {
+    margin-top: 15px;
+}
+
 #statics {
-    height: calc(100vh - 150px);
+    height: calc(100vh - 200px);
+    width: 100%;
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
 }
 
 .chart-wrapper {
+    height: 100%;
     width: 500px;
 }

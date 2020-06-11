@@ -2,22 +2,65 @@ $(document).ready(function() {
 
     //setto la libreria moment in italiano
     moment.locale("it");
+
+    //preparo la funzione di handlebars
+    var source = $("#option-template").html();
+    var template_function = Handlebars.compile(source);
+
     //url_api
     var url_api = "http://157.230.17.132:4029/sales";
-    //effettuo la chiamata ajax per recuperare la lista delle vendite
-    $.ajax({
-        "url": url_api,
-        "method": "GET",
-        "success": function(data) {
-            //gestisco i dati per ottenere il fatturato mensile
-            vendite_mensili(data);
-            //gestisco i dati per ottenere le vendite per persona
-            vendite_persona(data);
-        },
-        "error": function() {
-            alert("Si è verificato un errore");
+
+    //effettuo la chiamata ajax Get per leggere i dati delle vendita
+    chiamataAjaxGet();
+
+    //intercetto il click sul button "invia dati"
+    $("#send-data").click(function() {
+        var select_mesi = $("#month").val();
+        var select_venditori = $("#sellers").val();
+        var val_amount = $("#amount").val();
+        //se i valori sono validi effettuo i settaggi per la chiamata POST
+        if (select_mesi != "" && select_venditori != "" && val_amount > 0) {
+            //converto il valore del mese da testuale a numerico
+            var mese_transform = moment(select_mesi, "MMMM").format("MM");
+            //compongo una data generica, ma con il mese scelto dall'utente
+            var data = "01/" + mese_transform + "/2017";
+            //effettuo la chiamata ajax con metodo Http "POST" per aggiungere un parametro all'API
+            $.ajax({
+                "url": url_api,
+                "method": "POST",
+                "data": {
+                    "salesman": select_venditori,
+                    "amount": parseInt(val_amount),
+                    "date" : data
+                },
+                "success": function(data) {
+                    //effettuo una chiamata ajax per aggiornare i grafici
+                    chiamataAjaxGet();
+                },
+                "error": function() {
+                    alert("Si è verificato un errore");
+                }
+            })
+
         }
     })
+
+    function chiamataAjaxGet() {
+        //effettuo la chiamata ajax per recuperare la lista delle vendite
+        $.ajax({
+            "url": url_api,
+            "method": "GET",
+            "success": function(data) {
+                //gestisco i dati per ottenere il fatturato mensile
+                vendite_mensili(data);
+                //gestisco i dati per ottenere le vendite per persona
+                vendite_persona(data);
+            },
+            "error": function() {
+                alert("Si è verificato un errore");
+            }
+        })
+    }
 
     function vendite_mensili(data)  {
         //creo una variabile dove inserire l'ammontare delle vendite di ogni mese
@@ -41,7 +84,7 @@ $(document).ready(function() {
             //creo una variabile con la vendita corrente
             var vendita_corrente = data[i];
             //creo una variabile con l'ammontare della vendita corrente
-            var ammontare_corrente = vendita_corrente.amount;
+            var ammontare_corrente = parseInt(vendita_corrente.amount);
             //converto il mese da numerico a testuale
             var mese_corrente = moment(vendita_corrente.date, "DD/M/YYYY").format("MMMM");
             //aggiungo i valori alle chiavi dell'oggetto
@@ -52,9 +95,11 @@ $(document).ready(function() {
         var chiaveMesi = Object.keys(vendite_mensili);
         //faccio lo stesso per ottenere i valori
         var valoreAmount = Object.values(vendite_mensili);
-
         //setto il grafico
         setLineChart(chiaveMesi,valoreAmount);
+
+        //popolo la select dei mesi
+        option_select(chiaveMesi, "#month");
     }
 
     function setLineChart(mesi,amount) {
@@ -111,7 +156,7 @@ $(document).ready(function() {
         for (var i = 0; i < data.length; i++) {
             var vendita_corrente = data[i];
             var venditore_corrente = vendita_corrente.salesman;
-            var ammontare_corrente = vendita_corrente.amount;
+            var ammontare_corrente = parseInt(vendita_corrente.amount);
 
             //aggiungo l'ammontare corrente a quello totale
             ammontare_totale += ammontare_corrente;
@@ -137,7 +182,10 @@ $(document).ready(function() {
         var persona_venditore = Object.keys(vendite_persona);
         var ammontare_persona = Object.values(vendite_persona);
         //setto il grafico a torta
-        setPieChart(persona_venditore, ammontare_persona)
+        setPieChart(persona_venditore, ammontare_persona);
+
+        //setto la select dei venditori
+        option_select(persona_venditore, "#sellers");
     }
 
     function setPieChart(persona, amount) {
@@ -164,5 +212,17 @@ $(document).ready(function() {
                 }
             }
         })
+    }
+
+    function option_select(lista_dati,selettore) {
+        //ciclo l'array comprendente tutti i mesi e li inserisco uno ad uno tra le option della select
+        for (var i = 0; i < lista_dati.length; i++) {
+            var dato_corrente = lista_dati[i];
+            //aggiungo la prima lettera in grassetto
+            var dato_corrente_conver = dato_corrente.charAt(0).toUpperCase() + dato_corrente.slice(1);
+            var context = {"valore" : dato_corrente_conver};
+            var html_finale = template_function(context);
+            $(selettore).append(html_finale);
+        }
     }
 })
