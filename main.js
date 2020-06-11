@@ -77,6 +77,7 @@ $(document).ready(function() {
                     borderColor: 'rgba(255, 99, 132, 1)',
                     pointBackgroundColor: "green",
                     lineTension: 0,
+                    fill: false
                 }]
             },
             options: {
