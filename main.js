@@ -56,7 +56,7 @@ $(document).ready(function() {
             "success": function(data) {
                 //gestisco i dati per ottenere il fatturato mensile
                 vendite_mensili(data);
-                //gestisco i dati per ottenere le vendite per persona
+                //gestisco i dati per ottenere il fatturato per persona
                 vendite_persona(data);
             },
             "error": function() {
@@ -227,7 +227,7 @@ $(document).ready(function() {
     }
 
     function option_select(lista_dati,selettore) {
-        //ciclo l'array comprendente tutti i mesi e li inserisco uno ad uno tra le option della select
+        //creo un ciclo for della lista ed aggiungo per ogni valore corrente un option
         for (var i = 0; i < lista_dati.length; i++) {
             var dato_corrente = lista_dati[i];
             var context = {"valore" : dato_corrente};
