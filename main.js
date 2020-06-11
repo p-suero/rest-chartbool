@@ -1,10 +1,12 @@
 $(document).ready(function() {
 
-    //Alcuni ragionamenti provengono da un ticket con Donato e dallo scambio di idee con altri ragazzi
-
+    //setto la libreria moment in italiano
+    moment.locale("it");
+    //url_api
+    var url_api = "http://157.230.17.132:4029/sales";
     //effettuo la chiamata ajax per recuperare la lista delle vendite
     $.ajax({
-        "url": "http://157.230.17.132:4029/sales",
+        "url": url_api,
         "method": "GET",
         "success": function(data) {
             //gestisco i dati per ottenere il fatturato mensile
@@ -20,18 +22,18 @@ $(document).ready(function() {
     function vendite_mensili(data)  {
         //creo una variabile dove inserire l'ammontare delle vendite di ogni mese
         var vendite_mensili = {
-            "January" : 0,
-            "February": 0,
-            "March": 0,
-            "April": 0,
-            "May": 0,
-            "June": 0,
-            "July" : 0,
-            "August": 0,
-            "September": 0,
-            "October": 0,
-            "November": 0,
-            "December": 0
+            "gennaio" : 0,
+            "febbraio": 0,
+            "marzo": 0,
+            "aprile": 0,
+            "maggio": 0,
+            "giugno": 0,
+            "luglio" : 0,
+            "agosto": 0,
+            "settembre": 0,
+            "ottobre": 0,
+            "novembre": 0,
+            "dicembre": 0
         };
 
         //creo un ciclo for per aggiungere i valori alle chiavi dell'oggetto
