@@ -20,7 +20,7 @@ $(document).ready(function() {
         var val_amount = $("#amount");
 
         //se i valori sono validi effettuo i settaggi per la chiamata POST
-        if (select_mesi != "" && select_venditori != "" && val_amount > 0) {
+        if (select_mesi != "" && select_venditori != "" && val_amount.val().length > 0) {
             //converto il valore del mese da testuale a numerico
             var mese_testo = moment(select_mesi, "MMMM").format("MM");
             //compongo una data generica, ma con il mese scelto dall'utente
@@ -35,9 +35,9 @@ $(document).ready(function() {
                     "amount": parseInt(val_amount.val()),
                     "date" : data
                 },
-                "success": function(data) {
+                "success": function() {
                     //svuoto il valore dell'input
-                    $("#amount").val("");
+                    val_amount.val("");
                     //effettuo una chiamata ajax per aggiornare i grafici
                     chiamataAjaxGet();
                 },
@@ -101,8 +101,11 @@ $(document).ready(function() {
         //setto il grafico
         setLineChart(chiaveMesi,valoreAmount);
 
-        //popolo la select dei mesi
-        option_select(chiaveMesi, "#month");
+        //se il select ha un option oltre quella di default aggiungo i mesi
+        if ($("#month option").length == 1) {
+            //popolo la select dei mesi
+            option_select(chiaveMesi, "#month");
+        }
     }
 
     function setLineChart(mesi,amount) {
@@ -127,14 +130,7 @@ $(document).ready(function() {
             options: {
                 title: {
                     display: true,
-                    text: 'Numero delle vendite totali mese per mese nel 2017'
-                },
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
+                    text: 'Numero delle vendite mese per mese nel 2017'
                 },
                 tooltips: {
                    callbacks: {
@@ -187,8 +183,12 @@ $(document).ready(function() {
         //setto il grafico a torta
         setPieChart(persona_venditore, ammontare_persona);
 
-        //setto la select dei venditori
-        option_select(persona_venditore, "#sellers");
+        //se la select un opzione oltre quella di default aggiungoi venditori
+        if ($("#sellers option").length == 1) {
+            //setto la select dei venditori
+            option_select(persona_venditore, "#sellers");
+        }
+
     }
 
     function setPieChart(persona, amount) {
