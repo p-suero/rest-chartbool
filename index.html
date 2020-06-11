@@ -9,13 +9,30 @@
         <script src="https://momentjs.com/downloads/moment-with-locales.js" charset="utf-8"></script>
     </head>
     <body>
+        <header>
+            <h1>Statistiche vendite anno 2017</h1>
+        </header>
         <main>
-            <div class="chart-container">
-                <canvas id="chart-line"></canvas>
+            <div class="new-data">
+                <h2>Inserisci una nuova vendita:</h2>
+                <form>
+                    <select class="sellers">
+                        <option value="">Seleziona un venditore</option>
+                    </select>
+                    <select class="month">
+                        <option value="">Seleziona un mese</option>
+                    </select>
+                    <input type="number">
+                    <button>Inserisci</button>
+                </form>
             </div>
-            <div class="chart-container">
-                <canvas id="chart-pie"></canvas>
-            </div>
+            <div id="statics">
+                <div class="chart-wrapper">
+                    <canvas id="chart-line"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="chart-pie"></canvas>
+                </div>
         </main>
         <script src="main.js" charset="utf-8"></script>
     </body>

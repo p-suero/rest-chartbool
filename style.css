@@ -4,12 +4,30 @@
     box-sizing: border-box;
 }
 
-main {
+header {
+    height: 50px;
+    text-align: center;
+}
+
+.new-data {
+    text-align: center;
+    height: 100px;
+    padding-top: 40px;
+}
+
+h2 {
+    margin-bottom: 13px;
+    font-size: 16px;
+}
+
+#statics {
+    height: calc(100vh - 150px);
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
+    align-items: center;
 }
 
-.chart-container {
+.chart-wrapper {
     width: 500px;
 }

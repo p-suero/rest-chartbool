@@ -68,6 +68,7 @@ $(document).ready(function() {
                 labels: mesi,
                 datasets: [{
                     data: amount,
+                    label: "importi vendite",
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     pointBackgroundColor: "green",
@@ -80,16 +81,23 @@ $(document).ready(function() {
                     display: true,
                     text: 'Numero delle vendite totali mese per mese nel 2017'
                 },
-                legend: {
-                    display: false,
-                },
                 scales: {
                     yAxes: [{
                         ticks: {
                             beginAtZero: true
                         }
                     }]
-                }
+                },
+                tooltips: {
+                   callbacks: {
+                       label: function(tooltipItem, data) {
+                           var label = data.datasets[tooltipItem.datasetIndex].label + ': ';
+                           label += tooltipItem.yLabel;
+                           label += ' €';
+                           return label;
+                       }
+                   }
+               }
             }
         })
     }
