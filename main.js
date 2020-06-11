@@ -43,7 +43,7 @@ $(document).ready(function() {
             //creo una variabile con l'ammontare della vendita corrente
             var ammontare_corrente = vendita_corrente.amount;
             //converto il mese da numerico a testuale
-            var mese_corrente = ottieni_mese_testuale(vendita_corrente.date);
+            var mese_corrente = moment(vendita_corrente.date, "DD/M/YYYY").format("MMMM");
             //aggiungo i valori alle chiavi dell'oggetto
             vendite_mensili[mese_corrente] += ammontare_corrente;
         }
@@ -55,11 +55,6 @@ $(document).ready(function() {
 
         //setto il grafico
         setLineChart(chiaveMesi,valoreAmount);
-    }
-
-    function ottieni_mese_testuale(mese) {
-        var mese_testuale = moment(mese, "DD/M/YYYY").format("MMMM");
-        return mese_testuale;
     }
 
     function setLineChart(mesi,amount) {
