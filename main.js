@@ -17,23 +17,27 @@ $(document).ready(function() {
     $("#send-data").click(function() {
         var select_mesi = $("#month").val();
         var select_venditori = $("#sellers").val();
-        var val_amount = $("#amount").val();
+        var val_amount = $("#amount");
+
         //se i valori sono validi effettuo i settaggi per la chiamata POST
         if (select_mesi != "" && select_venditori != "" && val_amount > 0) {
             //converto il valore del mese da testuale a numerico
-            var mese_transform = moment(select_mesi, "MMMM").format("MM");
+            var mese_testo = moment(select_mesi, "MMMM").format("MM");
             //compongo una data generica, ma con il mese scelto dall'utente
-            var data = "01/" + mese_transform + "/2017";
+            var data = "01/" + mese_testo + "/2017";
+
             //effettuo la chiamata ajax con metodo Http "POST" per aggiungere un parametro all'API
             $.ajax({
                 "url": url_api,
                 "method": "POST",
                 "data": {
                     "salesman": select_venditori,
-                    "amount": parseInt(val_amount),
+                    "amount": parseInt(val_amount.val()),
                     "date" : data
                 },
                 "success": function(data) {
+                    //svuoto il valore dell'input
+                    $("#amount").val("");
                     //effettuo una chiamata ajax per aggiornare i grafici
                     chiamataAjaxGet();
                 },
@@ -41,7 +45,6 @@ $(document).ready(function() {
                     alert("Si è verificato un errore");
                 }
             })
-
         }
     })
 
