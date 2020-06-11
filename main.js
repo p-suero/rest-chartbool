@@ -17,10 +17,10 @@ $(document).ready(function() {
     $("#send-data").click(function() {
         var select_mesi = $("#month").val();
         var select_venditori = $("#sellers").val();
-        var val_amount = $("#amount");
+        var val_amount = parseInt($("#amount").val());
 
         //se i valori sono validi effettuo i settaggi per la chiamata POST
-        if (select_mesi != "" && select_venditori != "" && val_amount.val().length > 0) {
+        if (select_mesi != "" && select_venditori != "" && val_amount != "") {
             //converto il valore del mese da testuale a numerico
             var mese_testo = moment(select_mesi, "MMMM").format("MM");
             //compongo una data generica, ma con il mese scelto dall'utente
@@ -32,12 +32,12 @@ $(document).ready(function() {
                 "method": "POST",
                 "data": {
                     "salesman": select_venditori,
-                    "amount": parseInt(val_amount.val()),
+                    "amount": val_amount,
                     "date" : data
                 },
                 "success": function() {
                     //svuoto il valore dell'input
-                    val_amount.val("");
+                    $("#amount").val("");
                     //effettuo una chiamata ajax per aggiornare i grafici
                     chiamataAjaxGet();
                 },
@@ -68,18 +68,18 @@ $(document).ready(function() {
     function vendite_mensili(data)  {
         //creo una variabile dove inserire l'ammontare delle vendite di ogni mese
         var vendite_mensili = {
-            "gennaio" : 0,
-            "febbraio": 0,
-            "marzo": 0,
-            "aprile": 0,
-            "maggio": 0,
-            "giugno": 0,
-            "luglio" : 0,
-            "agosto": 0,
-            "settembre": 0,
-            "ottobre": 0,
-            "novembre": 0,
-            "dicembre": 0
+            "Gennaio": 0,
+            "Febbraio": 0,
+            "Marzo": 0,
+            "Aprile": 0,
+            "Maggio": 0,
+            "Giugno": 0,
+            "Luglio" : 0,
+            "Agosto": 0,
+            "Settembre": 0,
+            "Ottobre": 0,
+            "Novembre": 0,
+            "Dicembre": 0
         };
 
         //creo un ciclo for per aggiungere i valori alle chiavi dell'oggetto
@@ -90,8 +90,10 @@ $(document).ready(function() {
             var ammontare_corrente = parseInt(vendita_corrente.amount);
             //converto il mese da numerico a testuale
             var mese_corrente = moment(vendita_corrente.date, "DD/M/YYYY").format("MMMM");
+            //inserisco la prima lettera del mese in maiuscolo
+            var mese_corrente_grass = mese_corrente.charAt(0).toUpperCase() + mese_corrente.slice(1);
             //aggiungo i valori alle chiavi dell'oggetto
-            vendite_mensili[mese_corrente] += ammontare_corrente;
+            vendite_mensili[mese_corrente_grass] += ammontare_corrente;
         }
 
         //creo una variabile con le chiavi dell'oggetto
@@ -131,6 +133,13 @@ $(document).ready(function() {
                 title: {
                     display: true,
                     text: 'Numero delle vendite mese per mese nel 2017'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
                 },
                 tooltips: {
                    callbacks: {
@@ -221,9 +230,7 @@ $(document).ready(function() {
         //ciclo l'array comprendente tutti i mesi e li inserisco uno ad uno tra le option della select
         for (var i = 0; i < lista_dati.length; i++) {
             var dato_corrente = lista_dati[i];
-            //aggiungo la prima lettera in grassetto
-            var dato_corrente_conver = dato_corrente.charAt(0).toUpperCase() + dato_corrente.slice(1);
-            var context = {"valore" : dato_corrente_conver};
+            var context = {"valore" : dato_corrente};
             var html_finale = template_function(context);
             $(selettore).append(html_finale);
         }
