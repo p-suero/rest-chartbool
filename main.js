@@ -62,6 +62,8 @@ $(document).ready(function() {
                 vendite_mensili(data,aggiorna);
                 //gestisco i dati per ottenere il fatturato per persona
                 vendite_persona(data,aggiorna);
+                //gestisco i dati per ottenere il fatturato diviso in quarter
+                vendite_quarter(data,aggiorna)
             },
             "error": function() {
                 alert("Si è verificato un errore");
@@ -89,23 +91,23 @@ $(document).ready(function() {
             //creo una variabile con l'ammontare della vendita corrente
             var ammontare_corrente = parseFloat(vendita_corrente.amount);
             //creo una variabile dove inserire il mese convertito (con la libreria moment) da numerico a testuale
-            var mese_corrente = moment(vendita_corrente.date, "DD/M/YYYY").format("MMMM");
+            var mese_corrente = moment(vendita_corrente.date, "DD/MM/YYYY").format("MMMM");
             //aggiungo la prima lettera del mese in mauscolo
             var mese_corrente_upp = mese_corrente.charAt(0).toUpperCase() + mese_corrente.slice(1);
             //aggiungo i valori alle chiavi dell'oggetto
             vendite_mensili[mese_corrente_upp] += ammontare_corrente;
         }
         //creo una variabile con le chiavi dell'oggetto
-        var chiaveMesi = Object.keys(vendite_mensili);
+        var mesi = Object.keys(vendite_mensili);
         //faccio lo stesso per ottenere i valori
         var ammontare_mese = Object.values(vendite_mensili);
         //popolo la select dei venditori
-        popola_select_mesi(chiaveMesi);
+        popola_select_mesi(mesi);
 
         //se la variabile aggiorna è uguale a "false" setto il grafico per la prima volta
         if (aggiorna == false) {
             //aggiungo i dati nel grafico per la prima volta
-            imposta_grafico_mesi(chiaveMesi,ammontare_mese);
+            imposta_grafico_mesi(mesi,ammontare_mese);
         } else {
             //altrimenti lo aggiorno semplicemente
             //vado a selezionare il data e lo pongo uguale all'array aggiornato
@@ -116,9 +118,8 @@ $(document).ready(function() {
     }
 
     function imposta_grafico_mesi(mesi,amount) {
-
         //vado a settare il grafico
-        grafico_mesi = new Chart($('#chart-line')[0].getContext('2d'), {
+        grafico_mesi = new Chart($('#chart-mese')[0].getContext('2d'), {
             type: 'line',
             data: {
                 labels: mesi,
@@ -135,7 +136,7 @@ $(document).ready(function() {
             options: {
                 title: {
                     display: true,
-                    text: 'Numero delle vendite mese per mese nel 2017'
+                    text: 'Numero delle vendite mese'
                 },
                 scales: {
                     yAxes: [{
@@ -198,7 +199,7 @@ $(document).ready(function() {
 
         //se la variabile aggiona è false setto il grafico per la prima volta
         if (aggiorna == false) {
-            //setto il grafico a torta
+            //setto il grafico
             imposta_grafico_venditore(persona_venditore, ammontare_persona);
         } else {
             //altrimenti lo aggiorno semplicemente
@@ -225,14 +226,14 @@ $(document).ready(function() {
         }
 
         //vado a settare il grafico (indico una variabile gloabale per aggiornarlo al fuori della funzione)
-        grafico_venditori = new Chart($('#chart-pie')[0].getContext('2d'), {
+        grafico_venditori = new Chart($('#chart-venditori')[0].getContext('2d'), {
             type: 'pie',
             data: {
                 labels: persona,
                 datasets: [{
                     data: amount,
                     backgroundColor: colori_sfondo,
-                    borderColor: colori_bordo,
+                    borderColor: colori_bordo
                 }]
             },
             options: {
@@ -252,6 +253,89 @@ $(document).ready(function() {
                         }
                     }
                 }
+            }
+        })
+    }
+
+    function vendite_quarter(lista_vendite,aggiorna) {
+        //creo una varibile contenente l'oggetto
+        var vendite_quarter = {};
+
+        //creo un ciclo for per creare le chiavi dell'oggetto quarters
+        for (var i = 1; i <= 4; i++) {
+            var quarter = "Q" + i;
+            vendite_quarter[quarter] = 0;
+        }
+
+        //creo un ciclo for per assegnare i valori ai quarters
+        for (var i = 0; i < lista_vendite.length; i++) {
+            //tramite la lobreria moment vedo il quarter a cui corrisponde il mese
+            var moment_quarter = moment(lista_vendite[i].date, "DD,MM,YYYY").quarter();
+            //affianco il quarter alla stringa "Q"
+            var quarter = "Q" + moment_quarter;
+            //aggiungo la vendita al quarter corrispondente
+            vendite_quarter[quarter]++
+        }
+
+        //creo una variabile con le chiavi dell'oggetto
+        var quarters = Object.keys(vendite_quarter);
+        //faccio lo stesso per ottenere i valori
+        var numero_vendite = Object.values(vendite_quarter);
+
+        //se la variabile aggiona è false setto il grafico per la prima volta
+        if (aggiorna == false) {
+            //setto il grafico a torta
+            imposta_grafico_quarter(quarters, numero_vendite);
+        } else {
+            //altrimenti lo aggiorno semplicemente
+            //vado a selezionare il data e lo pongo uguale all'array aggiornato
+            grafico_quarter.config.data.datasets[0].data = numero_vendite;
+            //uso la seguente funzione per aggiornare i dati nel grafico
+            grafico_quarter.update();
+        }
+    }
+
+    function imposta_grafico_quarter(quarters, numero_vendite) {
+        //creo una variabile contenente l'array di colori di sfondo
+        var colori_sfondo = [];
+        //creo una variabile conentente l'array di colori dei bordi
+        var colori_bordo = [];
+        //ciclo l'array persona per creare un numero random per ciascun venditore
+        for (var i = 0; i < quarters.length; i++) {
+            var rosso = genera_random(0,255);
+            var verde = genera_random(0,255);
+            var blu = genera_random(0,255);
+            colori_sfondo.push("rgba(" + rosso + "," + verde + "," + blu + ",0.3)");
+            colori_bordo.push("rgba(" + rosso + "," + verde + "," + blu + ",1)");
+        }
+
+        //vado a settare il grafico (indico una variabile gloabale per aggiornarlo al fuori della funzione)
+        grafico_quarter = new Chart($('#chart-quarters')[0].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: quarters,
+                datasets: [{
+                    data: numero_vendite,
+                    backgroundColor: colori_sfondo,
+                    borderColor: colori_bordo,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Numero delle vendite divise per quarter'
+                },
+                legend: {
+                   display: false,
+               },
+               scales: {
+                   yAxes: [{
+                       ticks: {
+                           beginAtZero: true
+                       }
+                   }]
+               }
             }
         })
     }
