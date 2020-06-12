@@ -184,7 +184,7 @@ $(document).ready(function() {
         //creo un ciclo for in per sovrascrivere i valori dell'oggetto in valori percentuali
         for (var key in vendite_persona) {
             //trasformo il valore in percentuale
-            var vendita_percentuale = (vendite_persona[key] / ammontare_totale * 100).toFixed(2);
+            var vendita_percentuale = (vendite_persona[key] / ammontare_totale * 100).toFixed(1);
             //sovrascrivo il valore dell'oggetto
             vendite_persona[key] = vendita_percentuale;
         }
@@ -195,7 +195,7 @@ $(document).ready(function() {
 
         //popolo la select dei venditori
         popola_select_venditori(persona_venditore);
-        
+
         //se la variabile aggiona è false setto il grafico per la prima volta
         if (aggiorna == false) {
             //setto il grafico a torta
@@ -211,14 +211,28 @@ $(document).ready(function() {
 
     function imposta_grafico_venditore(persona, amount) {
 
-        //vado a settare il grafico
+        //creo una variabile contenente l'array di colori di sfondo
+        var colori_sfondo = [];
+        //creo una variabile conentente l'array di colori dei bordi
+        var colori_bordo = [];
+        //ciclo l'array persona per creare un numero random per ciascun venditore
+        for (var i = 0; i < persona.length; i++) {
+            var rosso = genera_random(0,255);
+            var verde = genera_random(0,255);
+            var blu = genera_random(0,255);
+            colori_sfondo.push("rgba(" + rosso + "," + verde + "," + blu + ",0.2)");
+            colori_bordo.push("rgba(" + rosso + "," + verde + "," + blu + ",1)");
+        }
+
+        //vado a settare il grafico (indico una variabile gloabale per aggiornarlo al fuori della funzione)
         grafico_venditori = new Chart($('#chart-pie')[0].getContext('2d'), {
             type: 'pie',
             data: {
                 labels: persona,
                 datasets: [{
                     data: amount,
-                    backgroundColor: ["red", "green", "yellow","orange"],
+                    backgroundColor: colori_sfondo,
+                    borderColor: colori_bordo,
                 }]
             },
             options: {
@@ -302,5 +316,9 @@ $(document).ready(function() {
             //aggiungo l'html in pagina
             $("#sellers").append(html_finale);
         }
+    }
+
+    function genera_random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) ) + min;
     }
 })
