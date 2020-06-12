@@ -3,9 +3,13 @@ $(document).ready(function() {
     //setto la libreria moment in italiano
     moment.locale("it");
 
-    //preparo la funzione di handlebars
-    var source = $("#option-template").html();
-    var template_function = Handlebars.compile(source);
+    //preparo la funzione di handlebars per le option dei venditori
+    var template_option_mesi = $("#option-month-template").html();
+    var template_function_mesi = Handlebars.compile(template_option_mesi);
+
+    //preparo la funzione di handlebars per le option dei mesi
+    var template_option_venditori = $("#option-sellers-template").html();
+    var template_function_venditori = Handlebars.compile(template_option_venditori);
 
     //url_api
     var url_api = "http://157.230.17.132:4029/sales";
@@ -15,23 +19,25 @@ $(document).ready(function() {
 
     //intercetto il click sul button "invia dati"
     $("#send-data").click(function() {
-        var select_mesi = $("#month").val();
-        var select_venditori = $("#sellers").val();
-        var val_amount = parseInt($("#amount").val());
+        var val_select_mesi = $("#month").val();
+        var val_select_venditori = $("#sellers").val();
+        var val_amount = $("#amount").val();
 
         //se i valori sono validi effettuo i settaggi per la chiamata POST
-        if (select_mesi != "" && select_venditori != "" && val_amount != "") {
-            //converto il valore del mese da testuale a numerico
-            var mese_testo = moment(select_mesi, "MMMM").format("MM");
+        if (val_select_mesi != "" && val_select_venditori != "" && val_amount != "") {
             //compongo una data generica, ma con il mese scelto dall'utente
-            var data = "01/" + mese_testo + "/2017";
+            var data = "01/" + val_select_mesi + "/2017";
+            //svuoto i valori dell'input e della select
+            $("#month").val("");
+            $("#sellers").val("");
+            $("#amount").val("");
 
             //effettuo la chiamata ajax con metodo Http "POST" per aggiungere un parametro all'API
             $.ajax({
                 "url": url_api,
                 "method": "POST",
                 "data": {
-                    "salesman": select_venditori,
+                    "salesman": val_select_venditori,
                     "amount": val_amount,
                     "date" : data
                 },
@@ -67,47 +73,40 @@ $(document).ready(function() {
 
     function vendite_mensili(data)  {
         //creo una variabile dove inserire l'ammontare delle vendite di ogni mese
-        var vendite_mensili = {
-            "Gennaio": 0,
-            "Febbraio": 0,
-            "Marzo": 0,
-            "Aprile": 0,
-            "Maggio": 0,
-            "Giugno": 0,
-            "Luglio" : 0,
-            "Agosto": 0,
-            "Settembre": 0,
-            "Ottobre": 0,
-            "Novembre": 0,
-            "Dicembre": 0
-        };
+        var vendite_mensili = {};
 
-        //creo un ciclo for per aggiungere i valori alle chiavi dell'oggetto
+        //creo un ciclo for per aggiungere i mesi all'oggetto vendite_mensili
+        for (var i = 1; i <= 12; i++) {
+            //converto la i in mese testuale
+            var data_moment = moment(i , "M").format("MMMM");
+            //aggiungo la prima lettera del mese in mauscolo
+            var data_moment_upp = data_moment.charAt(0).toUpperCase() + data_moment.slice(1);
+            vendite_mensili[data_moment_upp] = 0;
+        }
+
+        //creo un ciclo for per aggiungere i valori alle chiavi dell'oggetto vendite_mensili
         for (var i = 0; i < data.length; i++) {
             //creo una variabile con la vendita corrente
             var vendita_corrente = data[i];
             //creo una variabile con l'ammontare della vendita corrente
-            var ammontare_corrente = parseInt(vendita_corrente.amount);
+            var ammontare_corrente = parseFloat(vendita_corrente.amount);
             //converto il mese da numerico a testuale
             var mese_corrente = moment(vendita_corrente.date, "DD/M/YYYY").format("MMMM");
-            //inserisco la prima lettera del mese in maiuscolo
-            var mese_corrente_grass = mese_corrente.charAt(0).toUpperCase() + mese_corrente.slice(1);
+            //aggiungo la prima lettera del mese in mauscolo
+            var mese_corrente_upp = mese_corrente.charAt(0).toUpperCase() + mese_corrente.slice(1);
             //aggiungo i valori alle chiavi dell'oggetto
-            vendite_mensili[mese_corrente_grass] += ammontare_corrente;
+            vendite_mensili[mese_corrente_upp] += ammontare_corrente;
         }
 
         //creo una variabile con le chiavi dell'oggetto
         var chiaveMesi = Object.keys(vendite_mensili);
         //faccio lo stesso per ottenere i valori
         var valoreAmount = Object.values(vendite_mensili);
-        //setto il grafico
+        //aggiungo i dati nel grafico
         setLineChart(chiaveMesi,valoreAmount);
 
-        //se il select ha un option oltre quella di default aggiungo i mesi
-        if ($("#month option").length == 1) {
-            //popolo la select dei mesi
-            option_select(chiaveMesi, "#month");
-        }
+        //popolo la select dei venditori
+        popola_select_mesi(chiaveMesi)
     }
 
     function setLineChart(mesi,amount) {
@@ -164,7 +163,7 @@ $(document).ready(function() {
         for (var i = 0; i < data.length; i++) {
             var vendita_corrente = data[i];
             var venditore_corrente = vendita_corrente.salesman;
-            var ammontare_corrente = parseInt(vendita_corrente.amount);
+            var ammontare_corrente = parseFloat(vendita_corrente.amount);
 
             //aggiungo l'ammontare corrente a quello totale
             ammontare_totale += ammontare_corrente;
@@ -192,12 +191,8 @@ $(document).ready(function() {
         //setto il grafico a torta
         setPieChart(persona_venditore, ammontare_persona);
 
-        //se la select un opzione oltre quella di default aggiungoi venditori
-        if ($("#sellers option").length == 1) {
-            //setto la select dei venditori
-            option_select(persona_venditore, "#sellers");
-        }
-
+        //popolo la select dei venditori
+        popola_select_venditori(persona_venditore)
     }
 
     function setPieChart(persona, amount) {
@@ -221,18 +216,79 @@ $(document).ready(function() {
                 },
                 legend: {
                     position: "left",
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var nome_venditore = data.labels[tooltipItem.index];
+                            var percentuale_vendite = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                            return nome_venditore + ': ' + percentuale_vendite + '%';
+                        }
+                    }
                 }
             }
         })
     }
 
-    function option_select(lista_dati,selettore) {
-        //creo un ciclo for della lista ed aggiungo per ogni valore corrente un option
-        for (var i = 0; i < lista_dati.length; i++) {
-            var dato_corrente = lista_dati[i];
-            var context = {"valore" : dato_corrente};
-            var html_finale = template_function(context);
-            $(selettore).append(html_finale);
+    function popola_select_mesi(lista_mesi) {
+        //svuoto la select
+        $("#month").empty();
+
+        //aggiungo l'option di default
+        var context = {
+            "numero": "",
+            "nome": "-- Seleziona un mese --"
+        }
+        var html_finale = template_function_mesi(context);
+        $("#month").append(html_finale);
+
+        //ciclo la lista dei mesi ed aggiungo per ognuno una option
+        for (var i = 0; i < lista_mesi.length; i++) {
+            //salvo il venditore corrente
+            var mese_corrente = lista_mesi[i];
+            //effettuo la somma di i ed 1 dato che parte da 0
+            var numero_mese = i + 1;
+            //se il numero_mese è minore di 10 gli aggiungo lo 0 come stringa(per non farlo sommare)
+            if (numero_mese < 10) {
+                numero_mese = "0" + numero_mese;
+            }
+            //creo il placeholder per handlebars
+            var context = {
+                "numero" : numero_mese,
+                 "nome": mese_corrente
+            };
+            //preparo la funzione di handlebars
+            var html_finale = template_function_mesi(context);
+            //aggiungo l'html in pagina
+            $("#month").append(html_finale);
+        }
+    }
+
+    function popola_select_venditori(lista_venditori) {
+        //svuoto la select
+        $("#sellers").empty();
+
+        //aggiungo l'option di default
+        var context = {
+            "numero": "",
+            "nome": "-- Seleziona un mese --"
+        }
+        var html_finale = template_function_venditori(context);
+        $("#sellers").append(html_finale);
+
+        //aggiungo per ogni venditore una option
+        for (var i = 0; i < lista_venditori.length; i++) {
+            //salvo il venditore corrente
+            var venditore_corrente = lista_venditori[i];
+            //creo il placeholder per handlebars
+            var context = {
+                "valore" : venditore_corrente,
+                "nome": venditore_corrente
+            }
+            //preparo la funzione di handlebats
+            var html_finale = template_function_venditori(context);
+            //aggiungo l'html in pagina
+            $("#sellers").append(html_finale);
         }
     }
 })

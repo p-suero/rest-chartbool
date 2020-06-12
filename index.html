@@ -17,12 +17,8 @@
             <div class="new-data">
                 <h2>Nuova vendita</h2>
                 <form>
-                    <select id="sellers">
-                        <option value="">Seleziona un venditore</option>
-                    </select>
-                    <select id="month">
-                        <option value="">Seleziona un mese</option>
-                    </select>
+                    <select id="sellers"></select>
+                    <select id="month"></select>
                     <input id="amount" type="number" placeholder="importo della vendita">
                 </form>
                 <button id="send-data">Inserisci vendita</button>
@@ -37,8 +33,11 @@
             </div>
         </main>
         <!-- template per handlebars -->
-        <script id="option-template" type="text/x-handlebars-template">
-            <option value="{{valore}}">{{valore}}</option>
+        <script id="option-month-template" type="text/x-handlebars-template">
+            <option value="{{numero}}">{{nome}}</option>
+        </script>
+        <script id="option-sellers-template" type="text/x-handlebars-template">
+            <option value="{{valore}}">{{nome}}</option>
         </script>
         <script src="main.js" charset="utf-8"></script>
     </body>
