@@ -14,8 +14,8 @@ $(document).ready(function() {
     //url_api
     var url_api = "http://157.230.17.132:4029/sales";
 
-    //effettuo la chiamata ajax Get per leggere i dati delle vendita
-    chiamataAjaxGet();
+    //effettuo la chiamata ajax per disegnare i grafici indicando il parametro "aggiorna" == false
+    disegna_grafici(false);
 
     //intercetto il click sul button "invia dati"
     $("#send-data").click(function() {
@@ -27,7 +27,7 @@ $(document).ready(function() {
         if (val_select_mesi != "" && val_select_venditori != "" && val_amount != "") {
             //compongo una data generica, ma con il mese scelto dall'utente
             var data = "01/" + val_select_mesi + "/2017";
-            //svuoto i valori dell'input e della select
+            //svuoto i valori delle select e dell'input
             $("#month").val("");
             $("#sellers").val("");
             $("#amount").val("");
@@ -42,10 +42,8 @@ $(document).ready(function() {
                     "date" : data
                 },
                 "success": function() {
-                    //svuoto il valore dell'input
-                    $("#amount").val("");
-                    //effettuo una chiamata ajax per aggiornare i grafici
-                    chiamataAjaxGet();
+                    //effettuo una chiamata ajax con parametro "true" per aggiornare solamente i valori del grafico
+                    disegna_grafici(true);
                 },
                 "error": function() {
                     alert("Si è verificato un errore");
@@ -54,16 +52,16 @@ $(document).ready(function() {
         }
     })
 
-    function chiamataAjaxGet() {
+    function disegna_grafici(aggiorna) {
         //effettuo la chiamata ajax per recuperare la lista delle vendite
         $.ajax({
             "url": url_api,
             "method": "GET",
             "success": function(data) {
                 //gestisco i dati per ottenere il fatturato mensile
-                vendite_mensili(data);
+                vendite_mensili(data,aggiorna);
                 //gestisco i dati per ottenere il fatturato per persona
-                vendite_persona(data);
+                vendite_persona(data,aggiorna);
             },
             "error": function() {
                 alert("Si è verificato un errore");
@@ -71,7 +69,7 @@ $(document).ready(function() {
         })
     }
 
-    function vendite_mensili(data)  {
+    function vendite_mensili(data,aggiorna)  {
         //creo una variabile dove inserire l'ammontare delle vendite di ogni mese
         var vendite_mensili = {};
 
@@ -90,31 +88,37 @@ $(document).ready(function() {
             var vendita_corrente = data[i];
             //creo una variabile con l'ammontare della vendita corrente
             var ammontare_corrente = parseFloat(vendita_corrente.amount);
-            //converto il mese da numerico a testuale
+            //creo una variabile dove inserire il mese convertito (con la libreria moment) da numerico a testuale
             var mese_corrente = moment(vendita_corrente.date, "DD/M/YYYY").format("MMMM");
             //aggiungo la prima lettera del mese in mauscolo
             var mese_corrente_upp = mese_corrente.charAt(0).toUpperCase() + mese_corrente.slice(1);
             //aggiungo i valori alle chiavi dell'oggetto
             vendite_mensili[mese_corrente_upp] += ammontare_corrente;
         }
-
         //creo una variabile con le chiavi dell'oggetto
         var chiaveMesi = Object.keys(vendite_mensili);
         //faccio lo stesso per ottenere i valori
-        var valoreAmount = Object.values(vendite_mensili);
-        //aggiungo i dati nel grafico
-        setLineChart(chiaveMesi,valoreAmount);
-
+        var ammontare_mese = Object.values(vendite_mensili);
         //popolo la select dei venditori
-        popola_select_mesi(chiaveMesi)
+        popola_select_mesi(chiaveMesi);
+
+        //se la variabile aggiorna è uguale a "false" setto il grafico per la prima volta
+        if (aggiorna == false) {
+            //aggiungo i dati nel grafico per la prima volta
+            imposta_grafico_mesi(chiaveMesi,ammontare_mese);
+        } else {
+            //altrimenti lo aggiorno semplicemente
+            //vado a selezionare il data e lo pongo uguale all'array aggiornato
+            grafico_mesi.config.data.datasets[0].data = ammontare_mese;
+            //uso la seguente funzione per aggiornare i dati nel grafico
+            grafico_mesi.update();
+        }
     }
 
-    function setLineChart(mesi,amount) {
-        //seleziono l'elemento in pagina
-        var ctx = $('#chart-line')[0].getContext('2d');
+    function imposta_grafico_mesi(mesi,amount) {
 
         //vado a settare il grafico
-        var myChart = new Chart(ctx, {
+        grafico_mesi = new Chart($('#chart-line')[0].getContext('2d'), {
             type: 'line',
             data: {
                 labels: mesi,
@@ -154,7 +158,7 @@ $(document).ready(function() {
         })
     }
 
-    function vendite_persona(data) {
+    function vendite_persona(data,aggiorna) {
         //creo un oggetto contenente le vendite per persona
         var vendite_persona = {};
         var ammontare_totale = 0;
@@ -188,19 +192,27 @@ $(document).ready(function() {
         //recupero la chiave dell'oggetto
         var persona_venditore = Object.keys(vendite_persona);
         var ammontare_persona = Object.values(vendite_persona);
-        //setto il grafico a torta
-        setPieChart(persona_venditore, ammontare_persona);
 
         //popolo la select dei venditori
-        popola_select_venditori(persona_venditore)
+        popola_select_venditori(persona_venditore);
+        
+        //se la variabile aggiona è false setto il grafico per la prima volta
+        if (aggiorna == false) {
+            //setto il grafico a torta
+            imposta_grafico_venditore(persona_venditore, ammontare_persona);
+        } else {
+            //altrimenti lo aggiorno semplicemente
+            //vado a selezionare il data e lo pongo uguale all'array aggiornato
+            grafico_venditori.config.data.datasets[0].data = ammontare_persona;
+            //uso la seguente funzione per aggiornare i dati nel grafico
+            grafico_venditori.update();
+        }
     }
 
-    function setPieChart(persona, amount) {
-        //seleziono l'elemento in pagina
-        var ctx = $('#chart-pie')[0].getContext('2d');
+    function imposta_grafico_venditore(persona, amount) {
 
         //vado a settare il grafico
-        var myChart = new Chart(ctx, {
+        grafico_venditori = new Chart($('#chart-pie')[0].getContext('2d'), {
             type: 'pie',
             data: {
                 labels: persona,
@@ -271,7 +283,7 @@ $(document).ready(function() {
         //aggiungo l'option di default
         var context = {
             "numero": "",
-            "nome": "-- Seleziona un mese --"
+            "nome": "-- Seleziona un venditore --"
         }
         var html_finale = template_function_venditori(context);
         $("#sellers").append(html_finale);
