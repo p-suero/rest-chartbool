@@ -63,7 +63,7 @@ $(document).ready(function() {
                 //gestisco i dati per ottenere il fatturato per persona
                 vendite_persona(data,aggiorna);
                 //gestisco i dati per ottenere il fatturato diviso in quarter
-                vendite_quarter(data,aggiorna)
+                vendite_quarter(data,aggiorna);
             },
             "error": function() {
                 alert("Si è verificato un errore");
@@ -136,7 +136,7 @@ $(document).ready(function() {
             options: {
                 title: {
                     display: true,
-                    text: 'Numero delle vendite mese'
+                    text: 'Numero delle vendite divise per mese'
                 },
                 scales: {
                     yAxes: [{
@@ -274,7 +274,7 @@ $(document).ready(function() {
             //affianco il quarter alla stringa "Q"
             var quarter = "Q" + moment_quarter;
             //aggiungo la vendita al quarter corrispondente
-            vendite_quarter[quarter]++
+            vendite_quarter[quarter]++;
         }
 
         //creo una variabile con le chiavi dell'oggetto
