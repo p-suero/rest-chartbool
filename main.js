@@ -261,20 +261,19 @@ $(document).ready(function() {
         //creo una varibile contenente l'oggetto
         var vendite_quarter = {};
 
-        //creo un ciclo for per creare le chiavi dell'oggetto quarters
-        for (var i = 1; i <= 4; i++) {
-            var quarter = "Q" + i;
-            vendite_quarter[quarter] = 0;
-        }
-
-        //creo un ciclo for per assegnare i valori ai quarters
+        //creo un ciclo for per assegnare le chiavi e valori all'oggetto vendite_quarter
         for (var i = 0; i < lista_vendite.length; i++) {
             //tramite la lobreria moment vedo il quarter a cui corrisponde il mese
             var moment_quarter = moment(lista_vendite[i].date, "DD,MM,YYYY").quarter();
             //affianco il quarter alla stringa "Q"
             var quarter = "Q" + moment_quarter;
-            //aggiungo la vendita al quarter corrispondente
-            vendite_quarter[quarter]++;
+            //se la chiave non esiste la creo e gli assegno il valore di 1
+            if (!vendite_quarter.hasOwnProperty(quarter)) {
+                vendite_quarter[quarter] = 1
+            } else {
+                //altrimenti la incremento di un valore
+                vendite_quarter[quarter]++
+            }
         }
 
         //creo una variabile con le chiavi dell'oggetto
